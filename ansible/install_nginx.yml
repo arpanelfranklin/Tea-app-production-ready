@@ -1,0 +1,13 @@
+name: Install Nginx 
+hosts: afd-ansible
+become: yes
+
+tasks:
+  - name: Install Nginx
+    package:
+      name: nginx
+      state: latest 
+  - name: Start Nginx
+    service:
+      name: nginx
+      state: started
