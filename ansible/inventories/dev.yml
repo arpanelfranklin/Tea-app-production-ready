@@ -1,7 +1,7 @@
 [tea-app-server]
-server1 ansible_host=""
+server1 ansible_host="54.82.77.217"
 server1 ansible_user="Ubuntu"
-server2 ansible_host=""
+server2 ansible_host="34.207.78.210"
 server2 ansible_host="ec2-user"
 [tea-app-server:vars]
 ansible-python-interpreter=/usr/bin/python3

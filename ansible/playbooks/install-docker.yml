@@ -1,0 +1,34 @@
+name: Install Docker
+hosts: tea-app-server
+become: yes
+tasks:
+  - name: installing docker in ubuntu 
+    package:
+      name: docker.io
+      state: present 
+    when: ansible_distribution == "Ubuntu"
+  - name: Add docker repo 
+    get_url:
+      url: https://download.docker.com/linux/centos/docker-ce.repo
+      dest: /etc/yum.repos.d/docer-ce.repo
+    when: ansible_distribution == "Amazon"
+
+  - name: installing dokcer in amazon linux
+    package:
+      name: docker
+      state: present
+    when: ansible_distribution == "Amazon"
+
+# Starting the Docker
+  - name: Start Docker
+    service:  
+      name: docker
+      state: started
+      enable: yes
+# Adding the user in docker group 
+  - name: Add docker group
+    user:
+      name: ansible_user_id
+      groups: docker
+      append: yes
+  

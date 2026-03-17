@@ -1,5 +1,5 @@
 name: Install Nginx 
-hosts: afd-ansible
+hosts: tea-app-server
 become: yes
 
 tasks:
