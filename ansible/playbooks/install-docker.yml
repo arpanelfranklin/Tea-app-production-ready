@@ -1,34 +1,79 @@
-name: Install Docker
-hosts: tea-app-server
-become: yes
-tasks:
-  - name: installing docker in ubuntu 
-    package:
-      name: docker.io
-      state: present 
-    when: ansible_distribution == "Ubuntu"
-  - name: Add docker repo 
-    get_url:
-      url: https://download.docker.com/linux/centos/docker-ce.repo
-      dest: /etc/yum.repos.d/docer-ce.repo
-    when: ansible_distribution == "Amazon"
-
-  - name: installing dokcer in amazon linux
-    package:
-      name: docker
+- name: Install docker
+  hosts: app
+  become: yes
+  tasks:
+    - name: Install required packages
+      apt:
+        name:
+          - ca-certificates
+          - curl
+          - gnupg
       state: present
-    when: ansible_distribution == "Amazon"
+      update_cache: yes
+      when: ansible_distribution == "Ubuntu"
 
-# Starting the Docker
-  - name: Start Docker
-    service:  
-      name: docker
-      state: started
-      enable: yes
-# Adding the user in docker group 
-  - name: Add docker group
-    user:
-      name: ansible_user_id
-      groups: docker
-      append: yes
-  
+    - name: Create keyrings directory
+      file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: '0755'
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Add Docker GPG key
+      shell: curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Set permissions for GPG key
+      file:
+        path: /etc/apt/keyrings/docker.gpg
+        mode: '0644'
+      when: ansible_distribution == "Ubuntu"
+    - name: add repo to APT resource 
+      shell: echo \
+            "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+            $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+            sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+      when: ansible_distribution == "Ubuntu"
+      
+    - name: install docker in ubuntu 
+      apt:
+        name: 
+          - docker.io
+          - docker-compose-plugin
+        state: present
+        update_cache: yes
+      when: ansible_distribution == "ubuntu"
+
+
+    - name: install docker in amazon linux 
+      yum:
+        name: docker
+        state: present
+      when: ansible_distribution == "Amazon"
+    - name: Ensure Docker CLI plugins directory exists
+      file:
+        path: /usr/local/lib/docker/cli-plugins
+        state: directory
+        mode: '0755'
+      when: ansible_distribution == "Amazon"
+    - name: install docker compose
+      get_url:
+        url: https://github.com/docker/compose/releases/download/v2.18.0/docker-compose-linux-x86_64
+        dest: /usr/local/lib/docker/cli-plugins/docker-compose
+        mode: '0755'
+      when: ansible_distribution == "Amazon"
+    - name: Make Docker Compose binary executable
+      file:
+        path: /usr/local/lib/docker/cli-plugins/docker-compose
+        mode: '0755'
+      when: ansible_distribution == "Amazon"
+    - name: Start docker
+      service:
+        name: docker
+        state: started
+        enabled: yes
+    - name: Group add
+      user:
+        name: "{{ansible_user}}"
+        group: docker
+        append: yes
