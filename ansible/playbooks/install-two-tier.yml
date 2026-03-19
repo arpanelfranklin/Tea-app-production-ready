@@ -4,9 +4,9 @@
   tasks:
     - name: cloning app
       git:
-        repo: https://github.com/arpanelfranklin/Two-tier-Maven-app.git
+        repo: https://github.com/arpanelfranklin/Tea-app.git
     - name: docker compose
       docker_compose:
-        project_src: ./Two-tier-Macen-app/
+        project_src: ./Tea-app/
         files: "docker-compose.yml"
         state: present
