@@ -1,0 +1,9 @@
+- name: Install git 
+  hosts: app
+  become: true
+  tasks:
+    - name: install git 
+      package:
+        name: git
+        state: latest
+      
